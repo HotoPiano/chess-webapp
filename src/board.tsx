@@ -121,6 +121,19 @@ export const Board = (p: {
   };
 
   const move = (posClicked: Pos) => {
+    // Set all pawns of same color justMovedDouble to false (for passant usage)
+    for (let x = 0; x < 8; x++) {
+      for (let y = 0; y < 8; y++) {
+        let piece: Piece | null = pieces[x][y];
+        if (
+          piece instanceof Pawn &&
+          piece.isBlack == pieces[selectedPos.y][selectedPos.x]?.isBlack
+        ) {
+          piece.justMovedDouble = false;
+        }
+      }
+    }
+
     pieces[posClicked.y][posClicked.x] = pieces[selectedPos.y][selectedPos.x];
     pieces[selectedPos.y][selectedPos.x] = null;
 
@@ -131,6 +144,7 @@ export const Board = (p: {
     ) {
       pieces[posClicked.y][posClicked.x] = new Queen(p.isBlack);
     }
+
     // Possibly castling, king has moved 2 steps? also move rook
     if (pieces[posClicked.y][posClicked.x] instanceof King) {
       let leftCastling: boolean | null = null;
@@ -147,6 +161,18 @@ export const Board = (p: {
         };
         pieces[rookToPos.y][rookToPos.x] = pieces[rookFromPos.y][rookFromPos.x];
         pieces[rookFromPos.y][rookFromPos.x] = null;
+      }
+    }
+
+    // Possibly passant, remove pawn behind moved pawn
+    if (pieces[posClicked.y][posClicked.x] instanceof Pawn) {
+      let piece: Piece | null = pieces[selectedPos.y][posClicked.x];
+      if (
+        piece instanceof Pawn &&
+        piece.justMovedDouble &&
+        piece.isBlack != pieces[posClicked.y][posClicked.x]?.isBlack
+      ) {
+        pieces[selectedPos.y][posClicked.x] = null;
       }
     }
 

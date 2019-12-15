@@ -5,6 +5,7 @@ import Pos from "./Pos";
 
 export default class Pawn extends Piece {
   hasMoved: boolean = false;
+  justMovedDouble: boolean = false;
   constructor(isBlack: boolean) {
     super(isBlack);
   }
@@ -14,6 +15,7 @@ export default class Pawn extends Piece {
   };
 
   setHasMoved = () => {
+    this.justMovedDouble = !this.hasMoved;
     this.hasMoved = true;
   };
 
@@ -39,7 +41,30 @@ export default class Pawn extends Piece {
       ) {
         return true;
       }
+      // passant
+      let enemyPosY = this.isBlack ? to.y - 1 : to.y + 1;
+      if (enemyPosY > -1 && enemyPosY < 8) {
+        let enemy: Piece | null = pieces[enemyPosY][to.x];
+        if (enemy instanceof Pawn && enemy.justMovedDouble) {
+          if (
+            pieces[to.y][to.x] == null &&
+            this.isBlack &&
+            (from.x == to.x - 1 || from.x == to.x + 1) &&
+            from.y == to.y - 1
+          ) {
+            return true;
+          } else if (
+            pieces[to.y][to.x] == null &&
+            !this.isBlack &&
+            (from.x == to.x - 1 || from.x == to.x + 1) &&
+            from.y == to.y + 1
+          ) {
+            return true;
+          }
+        }
+      }
     }
+
     // Move to enemy square
     else {
       if (
@@ -57,16 +82,6 @@ export default class Pawn extends Piece {
       ) {
         return true;
       }
-    }
-    // TODO Passant
-    /*It is a special pawn capture that can only occur immediately after a pawn makes a 
-    move of two squares from its starting square, and it could have been captured by an 
-    enemy pawn had it advanced only one square. The opponent captures the just-moved pawn 
-    "as it passes" through the first square. The result is the same as if the pawn had 
-    advanced only one square and the enemy pawn had captured it normally.
-    */
-    if (false) {
-      return true;
     }
     return false;
   };
