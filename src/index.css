@@ -12,6 +12,8 @@
 }
 
 .board {
+  border: 1px rgb(8, 8, 8);
+  border-style: solid;
 }
 
 .row {
@@ -19,11 +21,11 @@
 }
 
 .cell--can-kill {
-  background-color: red;
+  background-color: rgb(214, 47, 47);
 }
 
 .cell--can-move {
-  background-color: blue;
+  background-color: rgb(99, 196, 171);
 }
 
 .cell--dark {
@@ -39,10 +41,10 @@
 }
 
 .cell {
-}
-
-.button__cell {
   border: none;
+  outline: none;
+  border: 1px rgb(8, 8, 8);
+  border-style: solid;
 }
 
 .piece {

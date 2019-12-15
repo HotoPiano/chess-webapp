@@ -351,7 +351,7 @@ const Cell = (p: {
       key={p.id}
       onClick={() => p.handleCellClick(p.pos)}
       className={
-        "button__cell" +
+        "cell" +
         (p.canKill
           ? " cell--can-kill"
           : p.canMove
