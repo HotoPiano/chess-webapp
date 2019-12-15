@@ -131,6 +131,24 @@ export const Board = (p: {
     ) {
       pieces[posClicked.y][posClicked.x] = new Queen(p.isBlack);
     }
+    // Possibly castling, king has moved 2 steps? also move rook
+    if (pieces[posClicked.y][posClicked.x] instanceof King) {
+      let leftCastling: boolean | null = null;
+      if (selectedPos.x - 2 == posClicked.x) {
+        leftCastling = true;
+      } else if (selectedPos.x + 2 == posClicked.x) {
+        leftCastling = false;
+      }
+      if (leftCastling != null) {
+        let rookFromPos: Pos = { y: posClicked.y, x: leftCastling ? 0 : 7 };
+        let rookToPos: Pos = {
+          y: posClicked.y,
+          x: posClicked.x + (leftCastling ? 1 : -1)
+        };
+        pieces[rookToPos.y][rookToPos.x] = pieces[rookFromPos.y][rookFromPos.x];
+        pieces[rookFromPos.y][rookFromPos.x] = null;
+      }
+    }
 
     pieces[posClicked.y][posClicked.x]?.setHasMoved();
     setPieces(pieces);

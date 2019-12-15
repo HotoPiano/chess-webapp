@@ -2,6 +2,7 @@ import black_king from "./img/black_king.png";
 import white_king from "./img/white_king.png";
 import Piece from "./piece";
 import Pos from "./Pos";
+import Rook from "./rook";
 
 export default class King extends Piece {
   hasMoved: boolean = false;
@@ -28,13 +29,48 @@ export default class King extends Piece {
       return true;
     }
 
-    if (false) {
-      // TODO castling
-      /*Castling may only be done if the king has never moved, 
-the rook involved has never moved, the squares between the king and the rook involved are unoccupied, 
-the king is not in check, and the king does not cross over or end on a square attacked by an enemy piece.
-*/
-      return true;
+    // Castling
+    if (!this.hasMoved && from.y == to.y) {
+      let rookFromPosX = from.x - 2 == to.x ? 0 : from.x + 2 == to.x ? 7 : -1;
+      let rookToPosX =
+        this.isBlack && rookFromPosX == 0
+          ? 3
+          : this.isBlack && rookFromPosX == 7
+          ? 5
+          : !this.isBlack && rookFromPosX == 0
+          ? 2
+          : !this.isBlack && rookFromPosX == 7
+          ? 4
+          : -1;
+      let piece = pieces[from.y][rookFromPosX];
+      if (rookFromPosX != -1 && piece instanceof Rook) {
+        let rook: Rook | null = piece;
+        if (
+          !rook.hasMoved &&
+          rook.canMove(
+            { y: from.y, x: rookFromPosX },
+            { y: from.y, x: rookToPosX },
+            pieces
+          )
+        ) {
+          // return false if an opponent can move to the middle step
+          for (let y = 0; y < 8; y++) {
+            for (let x = 0; x < 8; x++) {
+              let kingMidStep: Pos = {
+                y: to.y,
+                x: from.x + (from.x - 2 == to.x ? -1 : +1)
+              };
+              if (
+                pieces[y][x]?.isBlack != this.isBlack &&
+                pieces[y][x]?.canMove({ y: y, x: x }, kingMidStep, pieces)
+              ) {
+                return false;
+              }
+            }
+          }
+          return true;
+        }
+      }
     }
     return false;
   };
