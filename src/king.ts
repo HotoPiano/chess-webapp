@@ -32,16 +32,7 @@ export default class King extends Piece {
     // Castling
     if (!this.hasMoved && from.y == to.y) {
       let rookFromPosX = from.x - 2 == to.x ? 0 : from.x + 2 == to.x ? 7 : -1;
-      let rookToPosX =
-        this.isBlack && rookFromPosX == 0
-          ? 3
-          : this.isBlack && rookFromPosX == 7
-          ? 5
-          : !this.isBlack && rookFromPosX == 0
-          ? 2
-          : !this.isBlack && rookFromPosX == 7
-          ? 4
-          : -1;
+      let rookToPosX = rookFromPosX == 0 ? 3 : rookFromPosX == 7 ? 5 : -1;
       let piece = pieces[from.y][rookFromPosX];
       if (rookFromPosX != -1 && piece instanceof Rook) {
         let rook: Rook | null = piece;
@@ -61,6 +52,7 @@ export default class King extends Piece {
                 x: from.x + (from.x - 2 == to.x ? -1 : +1)
               };
               if (
+                pieces[y][x] != null &&
                 pieces[y][x]?.isBlack != this.isBlack &&
                 pieces[y][x]?.canMove({ y: y, x: x }, kingMidStep, pieces)
               ) {
