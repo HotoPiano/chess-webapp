@@ -105,8 +105,18 @@ const App: React.FC = () => {
   };
 
   const startGameEasyAI = () => {
+    setModalState({
+      active: true,
+      title: "AI",
+      message:
+        "Sorry, too buggy to be used now, try again later! Only against local player is available.",
+      leftButton: null,
+      rightButton: { text: "Local player", action: startGameHuman }
+    });
+    /*
     setIsEasyAI(true);
     setPieces(getPiecesInitialState);
+    */
   };
 
   const onPlayerWin = (blackWins: boolean) => {
