@@ -20,6 +20,10 @@
   display: flex;
 }
 
+.cell--enemy-move {
+  background-color: palegreen;
+}
+
 .cell--can-kill {
   background-color: rgb(214, 47, 47);
 }

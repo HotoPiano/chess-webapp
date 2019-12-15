@@ -12,6 +12,7 @@ import Knight from "./knight";
 
 const App: React.FC = () => {
   let [isBlack, setIsBlack] = React.useState(false);
+  let [isEasyAI, setIsEasyAI] = React.useState(false);
 
   const getPiecesInitialState = (): (Piece | null)[][] => {
     return [
@@ -99,18 +100,13 @@ const App: React.FC = () => {
   }, []);
 
   const startGameHuman = () => {
+    setIsEasyAI(false);
     setPieces(getPiecesInitialState);
   };
 
   const startGameEasyAI = () => {
-    // TODO
-    setModalState({
-      active: true,
-      title: "Chess!",
-      message: "not yet implemented! For now, local player will do...",
-      leftButton: { text: "", action: startGameHuman },
-      rightButton: { text: "Ok", action: startGameHuman }
-    });
+    setIsEasyAI(true);
+    setPieces(getPiecesInitialState);
   };
 
   const onPlayerWin = (blackWins: boolean) => {
@@ -135,6 +131,7 @@ const App: React.FC = () => {
           isBlack={isBlack}
           setIsBlack={setIsBlack}
           playerWin={onPlayerWin}
+          isEasyAI={isEasyAI}
         />
       </div>
       <ModalPopup
