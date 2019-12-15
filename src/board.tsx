@@ -10,6 +10,9 @@ import Pawn from "./pawn";
 import Knight from "./knight";
 import open_field from "./img/open_field.png";
 
+let enemyMoveFrom: Pos = { y: -1, x: -1 };
+let enemyMoveTo: Pos = { y: -1, x: -1 };
+let selectedPos: Pos = { y: -1, x: -1 };
 export const Board = (p: {
   pieces: (Piece | null)[][];
   isBlack: boolean;
@@ -18,10 +21,6 @@ export const Board = (p: {
   playerWin(isBlack: boolean): void;
   isEasyAI: boolean;
 }) => {
-  let enemyMoveFrom: Pos = { y: -1, x: -1 };
-  let enemyMoveTo: Pos = { y: -1, x: -1 };
-  let gameEnd: boolean = false;
-  let [selectedPos, setSelectedPos] = React.useState<Pos>({ y: -1, x: -1 });
   const [moveOpportunities, setMoveOpportunities] = React.useState<number[][]>([
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
@@ -39,14 +38,14 @@ export const Board = (p: {
       if (selectedPos.y != -1) {
         // Deselect already selected piece
         if (selectedPos.x == posClicked.x && selectedPos.y == posClicked.y) {
-          setSelectedPos({ y: -1, x: -1 });
+          selectedPos = { y: -1, x: -1 };
           showMoves(null);
         }
         // Piece already selected
         else {
           // Select other piece of same color
           if (p.pieces[posClicked.y][posClicked.x]?.isBlack === p.isBlack) {
-            setSelectedPos(posClicked);
+            selectedPos = posClicked;
             showMoves(posClicked);
           }
           // Actual move
@@ -64,7 +63,7 @@ export const Board = (p: {
       } else {
         // Select piece
         if (p.isBlack === p.pieces[posClicked.y][posClicked.x]?.isBlack) {
-          setSelectedPos(posClicked);
+          selectedPos = posClicked;
           //show opportunities
           showMoves(posClicked);
         }
@@ -128,7 +127,7 @@ export const Board = (p: {
 
     p.pieces[to.y][to.x]?.setHasMoved();
     p.setPieces(p.pieces);
-    setSelectedPos({ y: -1, x: -1 });
+    selectedPos = { y: -1, x: -1 };
     p.setIsBlack(!p.isBlack);
     showMoves(null);
 
@@ -209,7 +208,6 @@ export const Board = (p: {
                 }
                 if (!hasSafeMove) {
                   p.playerWin(p.pieces[x2][y2]?.isBlack ? true : false);
-                  gameEnd = true;
                 }
               }
             }
@@ -221,7 +219,7 @@ export const Board = (p: {
 
   React.useEffect(() => {
     // If easy AI and next move is black player, automate next move
-    if (!gameEnd && p.isEasyAI && p.isBlack) {
+    if (p.isEasyAI && p.isBlack) {
       let possibleMoves: { from: Pos; to: Pos }[] = [];
       for (let y = 0; y < 8; y++) {
         for (let x = 0; x < 8; x++) {
@@ -288,7 +286,6 @@ export const Board = (p: {
   };
 
   const showMoves = (posClicked: Pos | null) => {
-    console.log(enemyMoveFrom.x);
     let tmpMoveOpportunities: number[][] = [
       [0, 0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0],
