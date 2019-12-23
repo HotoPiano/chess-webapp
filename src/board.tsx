@@ -240,7 +240,7 @@ export const Board = (p: {
         }
       }
       let chosenMove: { from: Pos; to: Pos } =
-        possibleMoves[Math.floor(Math.random() * (possibleMoves.length + 1))];
+        possibleMoves[Math.round((Math.random() * (possibleMoves.length + 1))-1)];
       enemyMoveFrom = chosenMove.from;
       enemyMoveTo = chosenMove.to;
       move(chosenMove.from, chosenMove.to);
