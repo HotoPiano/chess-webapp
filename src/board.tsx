@@ -18,7 +18,7 @@ export const Board = (p: {
   isBlack: boolean;
   setIsBlack: React.Dispatch<React.SetStateAction<boolean>>;
   setPieces(pieces: (Piece | null)[][]): void;
-  playerWin(isBlack: boolean): void;
+  gameOver(blackCanMove: boolean, kingThreatened: boolean): void;
   isEasyAI: boolean;
 }) => {
   const [moveOpportunities, setMoveOpportunities] = React.useState<number[][]>([
@@ -55,7 +55,7 @@ export const Board = (p: {
               posClicked,
               p.pieces
             ) &&
-            !kingThreatenedByMove(posClicked, selectedPos)
+            !ownKingThreatenedByMove(selectedPos, posClicked)
           ) {
             move(selectedPos, posClicked);
           }
@@ -72,29 +72,39 @@ export const Board = (p: {
   };
 
   const move = (from: Pos, to: Pos) => {
+    movePiece(from, to, p.pieces);
+
+    p.pieces[to.y][to.x]?.setHasMoved();
+    p.setPieces(p.pieces);
+    selectedPos = { y: -1, x: -1 };
+    p.setIsBlack(!p.isBlack);
+    showMoves(null);
+  };
+
+  const movePiece = (from: Pos, to: Pos, pieces: (Piece | null)[][]) => {
     // Set all pawns of same color justMovedDouble to false (for passant usage)
     for (let x = 0; x < 8; x++) {
       for (let y = 0; y < 8; y++) {
-        let piece: Piece | null = p.pieces[x][y];
+        let piece: Piece | null = pieces[x][y];
         if (
           piece instanceof Pawn &&
-          piece.isBlack == p.pieces[from.y][from.x]?.isBlack
+          piece.isBlack == pieces[from.y][from.x]?.isBlack
         ) {
           piece.justMovedDouble = false;
         }
       }
     }
 
-    p.pieces[to.y][to.x] = p.pieces[from.y][from.x];
-    p.pieces[from.y][from.x] = null;
+    pieces[to.y][to.x] = pieces[from.y][from.x];
+    pieces[from.y][from.x] = null;
 
     // Possibly make pawn into queen
-    if (p.pieces[to.y][to.x] instanceof Pawn && (to.y == 0 || to.y == 7)) {
-      p.pieces[to.y][to.x] = new Queen(p.isBlack);
+    if (pieces[to.y][to.x] instanceof Pawn && (to.y == 0 || to.y == 7)) {
+      pieces[to.y][to.x] = new Queen(p.isBlack);
     }
 
     // Possibly castling, king has moved 2 steps? also move rook
-    if (p.pieces[to.y][to.x] instanceof King) {
+    if (pieces[to.y][to.x] instanceof King) {
       let leftCastling: boolean | null = null;
       if (from.x - 2 == to.x) {
         leftCastling = true;
@@ -107,176 +117,229 @@ export const Board = (p: {
           y: to.y,
           x: to.x + (leftCastling ? 1 : -1)
         };
-        p.pieces[rookToPos.y][rookToPos.x] =
-          p.pieces[rookFromPos.y][rookFromPos.x];
-        p.pieces[rookFromPos.y][rookFromPos.x] = null;
+        pieces[rookToPos.y][rookToPos.x] = pieces[rookFromPos.y][rookFromPos.x];
+        pieces[rookFromPos.y][rookFromPos.x] = null;
       }
     }
 
     // Possibly passant, remove pawn behind moved pawn
-    if (p.pieces[to.y][to.x] instanceof Pawn) {
-      let piece: Piece | null = p.pieces[from.y][to.x];
+    if (pieces[to.y][to.x] instanceof Pawn) {
+      let piece: Piece | null = pieces[from.y][to.x];
       if (
         piece instanceof Pawn &&
         piece.justMovedDouble &&
-        piece.isBlack != p.pieces[to.y][to.x]?.isBlack
+        piece.isBlack != pieces[to.y][to.x]?.isBlack
       ) {
-        p.pieces[from.y][to.x] = null;
-      }
-    }
-
-    p.pieces[to.y][to.x]?.setHasMoved();
-    p.setPieces(p.pieces);
-    selectedPos = { y: -1, x: -1 };
-    p.setIsBlack(!p.isBlack);
-    showMoves(null);
-
-    // check if gameend, first check all pieces
-    for (let y = 0; y < 8; y++) {
-      for (let x = 0; x < 8; x++) {
-        if (p.pieces[y][x] != null) {
-          // Check if piece is now threatening opponent king
-          for (let y2 = 0; y2 < 8; y2++) {
-            for (let x2 = 0; x2 < 8; x2++) {
-              if (
-                p.pieces[y2][x2] != null &&
-                p.pieces[y2][x2] instanceof King &&
-                p.pieces[y][x]?.isBlack != p.pieces[y2][x2]?.isBlack &&
-                p.pieces[y][x]?.canMove(
-                  { y: y, x: x },
-                  { y: y2, x: x2 },
-                  p.pieces
-                )
-              ) {
-                let hasSafeMove: boolean = false;
-                // Game end if opponent cant make any moves to prevent it
-                for (let y3 = 0; y3 < 8; y3++) {
-                  for (let x3 = 0; x3 < 8; x3++) {
-                    // Check all moves for same color pieces
-                    if (
-                      p.pieces[y3][x3] != null &&
-                      p.pieces[y3][x3]?.isBlack == p.pieces[y2][x2]?.isBlack
-                    ) {
-                      for (let y4 = 0; y4 < 8; y4++) {
-                        for (let x4 = 0; x4 < 8; x4++) {
-                          if (
-                            p.pieces[y3][x3]?.canMove(
-                              { y: y3, x: x3 },
-                              { y: y4, x: x4 },
-                              p.pieces
-                            )
-                          ) {
-                            let tmpPieces: (Piece | null)[][] = [];
-                            p.pieces.forEach(element => {
-                              tmpPieces.push([...element]);
-                            });
-                            tmpPieces[y4][x4] = tmpPieces[y3][x3];
-                            tmpPieces[y3][x3] = null;
-                            let isSafeMove: boolean = true;
-                            // Check if anyone still threatens king after testmove
-                            for (let y5 = 0; y5 < 8; y5++) {
-                              for (let x5 = 0; x5 < 8; x5++) {
-                                // Find kings possibly new position
-                                for (let y6 = 0; y6 < 8; y6++) {
-                                  for (let x6 = 0; x6 < 8; x6++) {
-                                    if (
-                                      tmpPieces[y5][x5] != null &&
-                                      tmpPieces[y6][x6] != null &&
-                                      tmpPieces[y6][x6] instanceof King &&
-                                      tmpPieces[y5][x5]?.isBlack !=
-                                        tmpPieces[y6][x6]?.isBlack &&
-                                      tmpPieces[y5][x5]?.canMove(
-                                        { y: y5, x: x5 },
-                                        { y: y6, x: x6 },
-                                        tmpPieces
-                                      )
-                                    ) {
-                                      isSafeMove = false;
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                            if (isSafeMove) {
-                              hasSafeMove = true;
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-                if (!hasSafeMove) {
-                  p.playerWin(p.pieces[x2][y2]?.isBlack ? true : false);
-                }
-              }
-            }
-          }
-        }
+        pieces[from.y][to.x] = null;
       }
     }
   };
 
   React.useEffect(() => {
-    // If easy AI and next move is black player, automate next move
-    if (p.isEasyAI && p.isBlack) {
-      let possibleMoves: { from: Pos; to: Pos }[] = [];
+    // Find next players king
+    let kingPos: Pos | null = null;
+    let king: King | null = null;
+    for (let y = 0; y < 8; y++) {
+      for (let x = 0; x < 8; x++) {
+        let piece: Piece | null = p.pieces[y][x];
+        if (
+          piece != null &&
+          piece.isBlack == p.isBlack &&
+          piece instanceof King
+        ) {
+          king = piece;
+          kingPos = { x: x, y: y };
+        }
+      }
+    }
+    let kingThreatened = false;
+    let canMoveSafely = false;
+    // check if gameend, first check all pieces
+    if (kingPos != null && king != null) {
       for (let y = 0; y < 8; y++) {
         for (let x = 0; x < 8; x++) {
-          let from: Pos = { y: y, x: x };
-          for (let y2 = 0; y2 < 8; y2++) {
-            for (let x2 = 0; x2 < 8; x2++) {
-              let to: Pos = { y: y2, x: x2 };
-              if (
-                p.pieces[y][x] != null &&
-                p.pieces[y][x]?.isBlack &&
-                p.pieces[y][x]?.canMove(from, to, p.pieces) &&
-                !kingThreatenedByMove(from, to)
-              ) {
-                possibleMoves.push({ from, to });
+          const piece: Piece | null = p.pieces[y][x];
+
+          // Check if any of the moved players pieces threatens next players king
+          if (piece != null) {
+            // Pieces of moved player
+            if (piece.isBlack != king.isBlack) {
+              if (piece.canMove({ y: y, x: x }, kingPos, p.pieces)) {
+                kingThreatened = true;
+              }
+            }
+            // Pieces of next player
+            else {
+              // Check if any of next players moves is available without own king being threatened
+              for (let y2 = 0; y2 < 8; y2++) {
+                for (let x2 = 0; x2 < 8; x2++) {
+                  if (
+                    piece.canMove({ y: y, x: x }, { y: y2, x: x2 }, p.pieces) &&
+                    !ownKingThreatenedByMove({ y: y, x: x }, { y: y2, x: x2 })
+                  ) {
+                    canMoveSafely = true;
+                  }
+                }
               }
             }
           }
         }
       }
-      let chosenMove: { from: Pos; to: Pos } =
-        possibleMoves[Math.round((Math.random() * (possibleMoves.length + 1))-1)];
-      enemyMoveFrom = chosenMove.from;
-      enemyMoveTo = chosenMove.to;
-      move(chosenMove.from, chosenMove.to);
+
+      if (!canMoveSafely) {
+        p.gameOver(king.isBlack, kingThreatened);
+      } else {
+        // If easy AI and next move is black player, automate next move
+        if (p.isEasyAI && p.isBlack) {
+          let possibleMoves: {
+            from: Pos;
+            to: Pos;
+            pieceValues: { wv: number; bv: number };
+          }[] = [];
+          // Find all black pieces
+          for (let y = 0; y < 8; y++) {
+            for (let x = 0; x < 8; x++) {
+              let from: Pos = { y: y, x: x };
+              let tmpPiece = p.pieces[from.y][from.x];
+              // Find all black pieces' possible moves
+              if (tmpPiece != null && tmpPiece.isBlack) {
+                for (let y2 = 0; y2 < 8; y2++) {
+                  for (let x2 = 0; x2 < 8; x2++) {
+                    let to: Pos = { y: y2, x: x2 };
+                    if (
+                      tmpPiece.canMove(from, to, p.pieces) &&
+                      !ownKingThreatenedByMove(from, to)
+                    ) {
+                      // Try move
+                      let tmpPieces: (Piece | null)[][] = [];
+                      p.pieces.forEach(element => {
+                        tmpPieces.push([...element]);
+                      });
+                      movePiece(from, to, tmpPieces);
+                      // compare new board value
+                      // Possible move is found. TODO: add recursively call to check response move, and next moves - which will after that be best?
+                      let pieceValues = getBoardValue(tmpPieces);
+                      // try all white responsemoves to that
+                      for (let y3 = 0; y3 < 8; y3++) {
+                        for (let x3 = 0; x3 < 8; x3++) {
+                          let from2: Pos = { y: y3, x: x3 };
+                          let tmpPiece2 = tmpPieces[from2.y][from2.x];
+                          if (tmpPiece2 != null && !tmpPiece2.isBlack) {
+                            for (let y4 = 0; y4 < 8; y4++) {
+                              for (let x4 = 0; x4 < 8; x4++) {
+                                let to2: Pos = { y: y4, x: x4 };
+                                // Try respondmove
+                                let tmpPieces2: (Piece | null)[][] = [];
+                                tmpPieces.forEach(element => {
+                                  tmpPieces2.push([...element]);
+                                });
+                                movePiece(from2, to2, tmpPieces2);
+                                if (
+                                  tmpPiece2.canMove(from2, to2, tmpPieces2) &&
+                                  !ownKingThreatenedByMove(from2, to2)
+                                ) {
+                                  let pieceValues2 = getBoardValue(tmpPieces2);
+                                  pieceValues.bv += pieceValues2.bv;
+                                  pieceValues2.wv += pieceValues2.wv;
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                      possibleMoves.push({ from, to, pieceValues });
+                    }
+                  }
+                }
+              }
+            }
+          }
+          let chosenMoves: {
+            from: Pos;
+            to: Pos;
+            pieceValues: { wv: number; bv: number };
+          }[] = [];
+          possibleMoves.forEach(element => {
+            let addMove: boolean = false;
+            if (chosenMoves.length == 0) {
+              addMove = true;
+            } else if (
+              element.pieceValues.bv - element.pieceValues.wv ==
+              chosenMoves[0].pieceValues.bv - chosenMoves[0].pieceValues.wv
+            ) {
+              addMove = true;
+            } else if (
+              element.pieceValues.bv - element.pieceValues.wv >
+              chosenMoves[0].pieceValues.bv - chosenMoves[0].pieceValues.wv
+            ) {
+              chosenMoves = [];
+              addMove = true;
+            }
+            if (addMove) {
+              chosenMoves.push(element);
+            }
+          });
+          const chosenIndex = Math.floor(Math.random() * chosenMoves.length);
+          let chosenMove = chosenMoves[chosenIndex];
+          enemyMoveFrom = chosenMove.from;
+          enemyMoveTo = chosenMove.to;
+          move(chosenMove.from, chosenMove.to);
+        }
+      }
     }
   }, [move]);
+  //console.log(Math.floor(Math.random() * 2));
+  const getBoardValue = (pieces: (Piece | null)[][]) => {
+    let whiteValues: number = 0;
+    let blackValues: number = 0;
+    for (let x = 0; x < 8; x++) {
+      for (let y = 0; y < 8; y++) {
+        let piece = pieces[y][x];
+        if (piece != null) {
+          if (piece.isBlack) {
+            blackValues += piece.value;
+          } else {
+            whiteValues += piece.value;
+          }
+        }
+      }
+    }
+    return { wv: whiteValues, bv: blackValues };
+  };
 
-  const kingThreatenedByMove = (from: Pos, to: Pos) => {
+  const ownKingThreatenedByMove = (from: Pos, to: Pos) => {
     // Try move
     let tmpPieces: (Piece | null)[][] = [];
     p.pieces.forEach(element => {
       tmpPieces.push([...element]);
     });
-    tmpPieces[from.y][from.x] = tmpPieces[to.y][to.x];
-    tmpPieces[to.y][to.x] = null;
+    movePiece(from, to, tmpPieces);
 
-    // Check all opponent moves
-    for (let x = 0; x < 8; x++) {
-      for (let y = 0; y < 8; y++) {
-        // Find king
-        for (let x2 = 0; x2 < 8; x2++) {
-          for (let y2 = 0; y2 < 8; y2++) {
-            // If opponent can threat king, return false
-            if (
-              tmpPieces[y][x] != null &&
-              tmpPieces[y][x]?.isBlack != tmpPieces[from.y][from.x]?.isBlack &&
-              tmpPieces[y2][x2] != null &&
-              tmpPieces[y2][x2]?.isBlack ==
-                tmpPieces[from.y][from.x]?.isBlack &&
-              tmpPieces[y2][x2] instanceof King &&
-              tmpPieces[y][x]?.canMove(
-                { y: y, x: x },
-                { y: y2, x: x2 },
-                tmpPieces
-              )
-            ) {
-              return true;
+    // Find players king
+    for (let y = 0; y < 8; y++) {
+      for (let x = 0; x < 8; x++) {
+        let movedPiece: Piece | null = tmpPieces[to.y][to.x];
+        let piece: Piece | null = tmpPieces[y][x];
+        if (
+          piece != null &&
+          movedPiece != null &&
+          piece.isBlack == movedPiece.isBlack &&
+          piece instanceof King
+        ) {
+          let kingPos: Pos = { x: x, y: y };
+          let king: King = piece;
+
+          // Check if any opponent piece can move to kingpos
+          for (let x2 = 0; x2 < 8; x2++) {
+            for (let y2 = 0; y2 < 8; y2++) {
+              let tmpPiece: Piece | null = tmpPieces[y2][x2];
+              if (
+                tmpPiece != null &&
+                tmpPiece.isBlack != king.isBlack &&
+                tmpPiece.canMove({ y: y2, x: x2 }, kingPos, tmpPieces)
+              ) {
+                return true;
+              }
             }
           }
         }

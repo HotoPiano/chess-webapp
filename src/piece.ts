@@ -6,6 +6,7 @@ export default abstract class Piece {
     this.isBlack = isBlack;
   }
   isBlack: boolean;
+  abstract value: number;
   abstract getImage(): string;
   abstract setHasMoved(): void;
   abstract canMove(from: Pos, to: Pos, pieces: (Piece | null)[][]): boolean;

@@ -4,6 +4,7 @@ import Piece from "./piece";
 import Pos from "./Pos";
 
 export default class Knight extends Piece {
+  value = 3;
   constructor(isBlack: boolean) {
     super(isBlack);
   }

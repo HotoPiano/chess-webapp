@@ -4,6 +4,7 @@ import Piece from "./piece";
 import Pos from "./Pos";
 
 export default class Queen extends Piece {
+  value = 7;
   constructor(isBlack: boolean) {
     super(isBlack);
   }

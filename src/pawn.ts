@@ -4,6 +4,7 @@ import Piece from "./piece";
 import Pos from "./Pos";
 
 export default class Pawn extends Piece {
+  value = 1;
   hasMoved: boolean = false;
   justMovedDouble: boolean = false;
   constructor(isBlack: boolean) {

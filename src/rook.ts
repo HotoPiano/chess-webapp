@@ -4,6 +4,7 @@ import Piece from "./piece";
 import Pos from "./Pos";
 
 export default class Rook extends Piece {
+  value = 5;
   hasMoved: boolean = false;
   constructor(isBlack: boolean) {
     super(isBlack);

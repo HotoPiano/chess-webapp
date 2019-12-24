@@ -11,8 +11,10 @@ import Pawn from "./pawn";
 import Knight from "./knight";
 
 const App: React.FC = () => {
-  let [isBlack, setIsBlack] = React.useState(false);
-  let [isEasyAI, setIsEasyAI] = React.useState(false);
+  const [gameOverText, setGameOverText] = React.useState();
+  const [ongoingGame, setOnGoingGame] = React.useState(true);
+  const [isBlack, setIsBlack] = React.useState(false);
+  const [isEasyAI, setIsEasyAI] = React.useState(false);
 
   const getPiecesInitialState = (): (Piece | null)[][] => {
     return [
@@ -62,6 +64,9 @@ const App: React.FC = () => {
       ]
     ];
   };
+  const onSetPieces = (pieces: (Piece | null)[][]) => {
+    setPieces(pieces);
+  };
 
   let [pieces, setPieces] = React.useState<(Piece | null)[][]>(
     getPiecesInitialState
@@ -75,10 +80,6 @@ const App: React.FC = () => {
     rightButton: null
   });
 
-  const onSetPieces = (pieces: (Piece | null)[][]) => {
-    setPieces(pieces);
-  };
-
   const onCloseModal = () => {
     setModalState({
       active: false,
@@ -90,6 +91,10 @@ const App: React.FC = () => {
   };
 
   React.useEffect(() => {
+    askForOpponent();
+  }, []);
+
+  const askForOpponent = () => {
     setModalState({
       active: true,
       title: "Chess!",
@@ -97,40 +102,60 @@ const App: React.FC = () => {
       leftButton: { text: "Local player", action: startGameHuman },
       rightButton: { text: "Easy AI", action: startGameEasyAI }
     });
-  }, []);
+  };
 
   const startGameHuman = () => {
+    setOnGoingGame(true);
     setIsEasyAI(false);
+    setIsBlack(false);
     setPieces(getPiecesInitialState);
   };
 
   const startGameEasyAI = () => {
+    setOnGoingGame(true);
     setIsEasyAI(true);
+    setIsBlack(false);
     setPieces(getPiecesInitialState);
   };
 
-  const onPlayerWin = (blackWins: boolean) => {
-    setModalState({
-      active: true,
-      title: "Game ended! " + (blackWins ? "black" : "white") + " player wins.",
-      message: "New game?",
-      leftButton: { text: "Local player", action: startGameHuman },
-      rightButton: { text: "Easy AI", action: startGameEasyAI }
-    });
+  const onGameOver = (blackCanMove: boolean, kingThreatened: boolean) => {
+    let playerText: string = blackCanMove ? "White " : "Black ";
+    setGameOverText(
+      "Game over! " +
+        (kingThreatened
+          ? playerText + "player wins!"
+          : playerText + "player cannot move, it's a draw!")
+    );
+    setOnGoingGame(false);
+  };
+
+  const Header = () => {
+    if (ongoingGame) {
+      return (
+        <div className="board--column__header">
+          <h1>Current player: {isBlack ? "black" : "white"}</h1>
+        </div>
+      );
+    } else {
+      return (
+        <div className="board--column__header">
+          <h1>{gameOverText}</h1>
+          <button onClick={askForOpponent}>Start game</button>
+        </div>
+      );
+    }
   };
 
   return (
     <div className="game">
       <div className="board--column">
-        <div className="board--column__header">
-          <h1>Current player: {isBlack ? "black" : "white"}</h1>
-        </div>
+        <Header />
         <Board
           pieces={pieces}
           setPieces={onSetPieces}
           isBlack={isBlack}
           setIsBlack={setIsBlack}
-          playerWin={onPlayerWin}
+          gameOver={onGameOver}
           isEasyAI={isEasyAI}
         />
       </div>
