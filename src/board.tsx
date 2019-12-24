@@ -214,15 +214,15 @@ export const Board = (p: {
                       tmpPiece.canMove(from, to, p.pieces) &&
                       !ownKingThreatenedByMove(from, to, p.pieces)
                     ) {
-                      // Try move
+                      // Make board copy and try move
                       let tmpPieces: (Piece | null)[][] = [];
                       p.pieces.forEach(element => {
                         tmpPieces.push([...element]);
                       });
                       movePiece(from, to, tmpPieces);
                       // compare new board value
-                      // Possible move is found. TODO: add recursively call to check response move, and next moves - which will after that be best?
                       let pieceValues = getBoardValue(tmpPieces);
+                      // Possible move is found. TODO: add recursively call to check response move, and next moves - which will after that be best?
                       // try all white responsemoves to that
                       for (let y3 = 0; y3 < 8; y3++) {
                         for (let x3 = 0; x3 < 8; x3++) {
@@ -232,20 +232,21 @@ export const Board = (p: {
                             for (let y4 = 0; y4 < 8; y4++) {
                               for (let x4 = 0; x4 < 8; x4++) {
                                 let to2: Pos = { y: y4, x: x4 };
-                                // Try respondmove
-                                let tmpPieces2: (Piece | null)[][] = [];
-                                tmpPieces.forEach(element => {
-                                  tmpPieces2.push([...element]);
-                                });
-                                movePiece(from2, to2, tmpPieces2);
                                 if (
-                                  tmpPiece2.canMove(from2, to2, tmpPieces2) &&
+                                  tmpPiece2.canMove(from2, to2, tmpPieces) &&
                                   !ownKingThreatenedByMove(
                                     from2,
                                     to2,
-                                    tmpPieces2
+                                    tmpPieces
                                   )
                                 ) {
+                                  // Make board copy and try respondmove
+                                  let tmpPieces2: (Piece | null)[][] = [];
+                                  tmpPieces.forEach(element => {
+                                    tmpPieces2.push([...element]);
+                                  });
+                                  movePiece(from2, to2, tmpPieces2);
+                                  // compare new board value
                                   let pieceValues2 = getBoardValue(tmpPieces2);
                                   pieceValues.bv += pieceValues2.bv;
                                   pieceValues2.wv += pieceValues2.wv;
