@@ -195,74 +195,7 @@ export const Board = (p: {
       } else {
         // If easy AI and next move is black player, automate next move
         if (p.isEasyAI && p.isBlack) {
-          let possibleMoves: {
-            from: Pos;
-            to: Pos;
-            pieceValues: { wv: number; bv: number };
-          }[] = [];
-          // Find all black pieces
-          for (let y = 0; y < 8; y++) {
-            for (let x = 0; x < 8; x++) {
-              let from: Pos = { y: y, x: x };
-              let tmpPiece = p.pieces[from.y][from.x];
-              // Find all black pieces' possible moves
-              if (tmpPiece != null && tmpPiece.isBlack) {
-                for (let y2 = 0; y2 < 8; y2++) {
-                  for (let x2 = 0; x2 < 8; x2++) {
-                    let to: Pos = { y: y2, x: x2 };
-                    if (
-                      tmpPiece.canMove(from, to, p.pieces) &&
-                      !ownKingThreatenedByMove(from, to, p.pieces)
-                    ) {
-                      // Make board copy and try move
-                      let tmpPieces: (Piece | null)[][] = [];
-                      p.pieces.forEach(element => {
-                        tmpPieces.push([...element]);
-                      });
-                      movePiece(from, to, tmpPieces);
-                      // compare new board value
-                      let pieceValues = getBoardValue(tmpPieces);
-                      // Possible move is found. TODO: add recursively call to check response move, and next moves - which will after that be best?
-                      // try all white responsemoves to that
-                      for (let y3 = 0; y3 < 8; y3++) {
-                        for (let x3 = 0; x3 < 8; x3++) {
-                          let from2: Pos = { y: y3, x: x3 };
-                          let tmpPiece2 = tmpPieces[from2.y][from2.x];
-                          if (tmpPiece2 != null && !tmpPiece2.isBlack) {
-                            for (let y4 = 0; y4 < 8; y4++) {
-                              for (let x4 = 0; x4 < 8; x4++) {
-                                let to2: Pos = { y: y4, x: x4 };
-                                if (
-                                  tmpPiece2.canMove(from2, to2, tmpPieces) &&
-                                  !ownKingThreatenedByMove(
-                                    from2,
-                                    to2,
-                                    tmpPieces
-                                  )
-                                ) {
-                                  // Make board copy and try respondmove
-                                  let tmpPieces2: (Piece | null)[][] = [];
-                                  tmpPieces.forEach(element => {
-                                    tmpPieces2.push([...element]);
-                                  });
-                                  movePiece(from2, to2, tmpPieces2);
-                                  // compare new board value
-                                  let pieceValues2 = getBoardValue(tmpPieces2);
-                                  pieceValues.bv += pieceValues2.bv;
-                                  pieceValues2.wv += pieceValues2.wv;
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                      possibleMoves.push({ from, to, pieceValues });
-                    }
-                  }
-                }
-              }
-            }
-          }
+          let possibleMoves = findBestMoves(3);
           let chosenMoves: {
             from: Pos;
             to: Pos;
@@ -297,7 +230,123 @@ export const Board = (p: {
       }
     }
   }, [move]);
-  //console.log(Math.floor(Math.random() * 2));
+
+  const findBestMoves = (stepsAhead: number) => {
+    let possibleMoves: {
+      from: Pos;
+      to: Pos;
+      pieceValues: { wv: number; bv: number };
+    }[] = [];
+    // Find all black pieces
+    for (let y = 0; y < 8; y++) {
+      for (let x = 0; x < 8; x++) {
+        let from: Pos = { y: y, x: x };
+        let tmpPiece = p.pieces[from.y][from.x];
+        // Find all black pieces' possible moves
+        if (tmpPiece != null && tmpPiece.isBlack) {
+          for (let y2 = 0; y2 < 8; y2++) {
+            for (let x2 = 0; x2 < 8; x2++) {
+              let to: Pos = { y: y2, x: x2 };
+              if (
+                tmpPiece.canMove(from, to, p.pieces) &&
+                !ownKingThreatenedByMove(from, to, p.pieces)
+              ) {
+                // Make board copy and try move
+                let tmpPieces: (Piece | null)[][] = [];
+                p.pieces.forEach(element => {
+                  tmpPieces.push([...element]);
+                });
+                movePiece(from, to, tmpPieces);
+                // compare new board value
+                let pieceValues = getBoardValue(tmpPieces);
+                // Possible move is found. TODO: add recursively call to check response move, and next moves - which will after that be best?
+                // try all white responsemoves to that
+                let underPieceValues = findBestMove(3, tmpPieces, false);
+                pieceValues.bv += underPieceValues.bv;
+                pieceValues.wv += underPieceValues.wv;
+                /*
+                for (let y3 = 0; y3 < 8; y3++) {
+                  for (let x3 = 0; x3 < 8; x3++) {
+                    let from2: Pos = { y: y3, x: x3 };
+                    let tmpPiece2 = tmpPieces[from2.y][from2.x];
+                    if (tmpPiece2 != null && !tmpPiece2.isBlack) {
+                      for (let y4 = 0; y4 < 8; y4++) {
+                        for (let x4 = 0; x4 < 8; x4++) {
+                          let to2: Pos = { y: y4, x: x4 };
+                          if (
+                            tmpPiece2.canMove(from2, to2, tmpPieces) &&
+                            !ownKingThreatenedByMove(from2, to2, tmpPieces)
+                          ) {
+                            // Make board copy and try respondmove
+                            let tmpPieces2: (Piece | null)[][] = [];
+                            tmpPieces.forEach(element => {
+                              tmpPieces2.push([...element]);
+                            });
+                            movePiece(from2, to2, tmpPieces2);
+                            // compare new board value
+                            let pieceValues2 = getBoardValue(tmpPieces2);
+                            pieceValues.bv += pieceValues2.bv;
+                            pieceValues2.wv += pieceValues2.wv;
+                          }
+                        }
+                      }
+                    }
+                  }
+                }*/
+                possibleMoves.push({ from, to, pieceValues });
+              }
+            }
+          }
+        }
+      }
+    }
+    return possibleMoves;
+  };
+
+  const findBestMove = (
+    stepsAhead: number,
+    pieces: (Piece | null)[][],
+    curPlayerIsBlack: boolean
+  ): { bv: number; wv: number } => {
+    // compare new board value
+    let pieceValues = { wv: 0, bv: 0 };
+    for (let y = 0; y < 8; y++) {
+      for (let x = 0; x < 8; x++) {
+        let from: Pos = { y: y, x: x };
+        let tmpPiece = pieces[from.y][from.x];
+        // Find all black pieces' possible moves
+        if (tmpPiece != null && tmpPiece.isBlack == curPlayerIsBlack) {
+          for (let y2 = 0; y2 < 8; y2++) {
+            for (let x2 = 0; x2 < 8; x2++) {
+              let to: Pos = { y: y2, x: x2 };
+              if (
+                tmpPiece.canMove(from, to, pieces) &&
+                !ownKingThreatenedByMove(from, to, pieces)
+              ) {
+                // Make board copy and try move
+                let tmpPieces: (Piece | null)[][] = [];
+                pieces.forEach(element => {
+                  tmpPieces.push([...element]);
+                });
+                movePiece(from, to, tmpPieces);
+
+                let underPieceValues = findBestMove(
+                  stepsAhead - 1,
+                  tmpPieces,
+                  !curPlayerIsBlack
+                );
+                pieceValues.bv += underPieceValues.bv;
+                pieceValues.wv += underPieceValues.wv;
+                pieceValues = getBoardValue(tmpPieces);
+              }
+            }
+          }
+        }
+      }
+    }
+    return pieceValues;
+  };
+
   const getBoardValue = (pieces: (Piece | null)[][]) => {
     let whiteValues: number = 0;
     let blackValues: number = 0;
