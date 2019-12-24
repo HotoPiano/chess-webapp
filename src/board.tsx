@@ -55,7 +55,7 @@ export const Board = (p: {
               posClicked,
               p.pieces
             ) &&
-            !ownKingThreatenedByMove(selectedPos, posClicked)
+            !ownKingThreatenedByMove(selectedPos, posClicked, p.pieces)
           ) {
             move(selectedPos, posClicked);
           }
@@ -175,7 +175,11 @@ export const Board = (p: {
                 for (let x2 = 0; x2 < 8; x2++) {
                   if (
                     piece.canMove({ y: y, x: x }, { y: y2, x: x2 }, p.pieces) &&
-                    !ownKingThreatenedByMove({ y: y, x: x }, { y: y2, x: x2 })
+                    !ownKingThreatenedByMove(
+                      { y: y, x: x },
+                      { y: y2, x: x2 },
+                      p.pieces
+                    )
                   ) {
                     canMoveSafely = true;
                   }
@@ -208,7 +212,7 @@ export const Board = (p: {
                     let to: Pos = { y: y2, x: x2 };
                     if (
                       tmpPiece.canMove(from, to, p.pieces) &&
-                      !ownKingThreatenedByMove(from, to)
+                      !ownKingThreatenedByMove(from, to, p.pieces)
                     ) {
                       // Try move
                       let tmpPieces: (Piece | null)[][] = [];
@@ -236,7 +240,11 @@ export const Board = (p: {
                                 movePiece(from2, to2, tmpPieces2);
                                 if (
                                   tmpPiece2.canMove(from2, to2, tmpPieces2) &&
-                                  !ownKingThreatenedByMove(from2, to2)
+                                  !ownKingThreatenedByMove(
+                                    from2,
+                                    to2,
+                                    tmpPieces2
+                                  )
                                 ) {
                                   let pieceValues2 = getBoardValue(tmpPieces2);
                                   pieceValues.bv += pieceValues2.bv;
@@ -307,10 +315,14 @@ export const Board = (p: {
     return { wv: whiteValues, bv: blackValues };
   };
 
-  const ownKingThreatenedByMove = (from: Pos, to: Pos) => {
+  const ownKingThreatenedByMove = (
+    from: Pos,
+    to: Pos,
+    pieces: (Piece | null)[][]
+  ) => {
     // Try move
     let tmpPieces: (Piece | null)[][] = [];
-    p.pieces.forEach(element => {
+    pieces.forEach(element => {
       tmpPieces.push([...element]);
     });
     movePiece(from, to, tmpPieces);
