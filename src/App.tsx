@@ -1,6 +1,6 @@
 import * as React from "react";
 import "./App.css";
-import { Board } from "./board";
+import { GameBoard } from "./gameboard";
 import { ModalPopup, ModalState } from "./modal";
 import Piece from "./piece";
 import Bishop from "./bishop";
@@ -9,70 +9,15 @@ import King from "./king";
 import Queen from "./queen";
 import Pawn from "./pawn";
 import Knight from "./knight";
+import Loader from "./loader";
+import Board from "./board";
 
+let board: Board = new Board(-1);
 const App: React.FC = () => {
   const [gameOverText, setGameOverText] = React.useState();
   const [ongoingGame, setOnGoingGame] = React.useState(true);
   const [isBlack, setIsBlack] = React.useState(false);
-  const [isEasyAI, setIsEasyAI] = React.useState(false);
-
-  const getPiecesInitialState = (): (Piece | null)[][] => {
-    return [
-      [
-        new Rook(true),
-        new Knight(true),
-        new Bishop(true),
-        new Queen(true),
-        new King(true),
-        new Bishop(true),
-        new Knight(true),
-        new Rook(true)
-      ],
-      [
-        new Pawn(true),
-        new Pawn(true),
-        new Pawn(true),
-        new Pawn(true),
-        new Pawn(true),
-        new Pawn(true),
-        new Pawn(true),
-        new Pawn(true)
-      ],
-      [null, null, null, null, null, null, null, null],
-      [null, null, null, null, null, null, null, null],
-      [null, null, null, null, null, null, null, null],
-      [null, null, null, null, null, null, null, null],
-      [
-        new Pawn(false),
-        new Pawn(false),
-        new Pawn(false),
-        new Pawn(false),
-        new Pawn(false),
-        new Pawn(false),
-        new Pawn(false),
-        new Pawn(false)
-      ],
-      [
-        new Rook(false),
-        new Knight(false),
-        new Bishop(false),
-        new Queen(false),
-        new King(false),
-        new Bishop(false),
-        new Knight(false),
-        new Rook(false)
-      ]
-    ];
-  };
-  const onSetPieces = (pieces: (Piece | null)[][]) => {
-    setPieces(pieces);
-  };
-
-  let [pieces, setPieces] = React.useState<(Piece | null)[][]>(
-    getPiecesInitialState
-  );
-
-  let [modalState, setModalState] = React.useState<ModalState>({
+  const [modalState, setModalState] = React.useState<ModalState>({
     active: false,
     title: "",
     message: "",
@@ -99,23 +44,14 @@ const App: React.FC = () => {
       active: true,
       title: "Chess!",
       message: "Who will be your opponent?",
-      leftButton: { text: "Local player", action: startGameHuman },
-      rightButton: { text: "Easy AI", action: startGameEasyAI }
+      leftButton: { text: "Local player", action: () => startGame(-1) },
+      rightButton: { text: "Easy AI", action: () => startGame(1) }
     });
   };
 
-  const startGameHuman = () => {
+  const startGame = (stepsAhead: number) => {
+    board = new Board(stepsAhead);
     setOnGoingGame(true);
-    setIsEasyAI(false);
-    setIsBlack(false);
-    setPieces(getPiecesInitialState);
-  };
-
-  const startGameEasyAI = () => {
-    setOnGoingGame(true);
-    setIsEasyAI(true);
-    setIsBlack(false);
-    setPieces(getPiecesInitialState);
   };
 
   const onGameOver = (blackCanMove: boolean, kingThreatened: boolean) => {
@@ -131,16 +67,30 @@ const App: React.FC = () => {
 
   const Header = () => {
     if (ongoingGame) {
-      return (
-        <div className="board--column__header">
-          <h1>Current player: {isBlack ? "black" : "white"}</h1>
-        </div>
-      );
+      if (board.stepsAhead > 0 && board.isBlack) {
+        return (
+          <div className="board--column__header">
+            <h1>Calculating easy AI move...</h1>
+            <Loader />
+          </div>
+        );
+      } else {
+        return (
+          <div className="board--column__header">
+            <h1>Current player: {board.isBlack ? "black" : "white"}</h1>
+          </div>
+        );
+      }
     } else {
       return (
         <div className="board--column__header">
           <h1>{gameOverText}</h1>
-          <button onClick={askForOpponent}>Start game</button>
+          <button
+            className="button__option button__header"
+            onClick={askForOpponent}
+          >
+            <span className="button--text">New game</span>
+          </button>
         </div>
       );
     }
@@ -150,13 +100,10 @@ const App: React.FC = () => {
     <div className="game">
       <div className="board--column">
         <Header />
-        <Board
-          pieces={pieces}
-          setPieces={onSetPieces}
-          isBlack={isBlack}
-          setIsBlack={setIsBlack}
+        <GameBoard
+          board={board}
           gameOver={onGameOver}
-          isEasyAI={isEasyAI}
+          setIsBlack={setIsBlack}
         />
       </div>
       <ModalPopup

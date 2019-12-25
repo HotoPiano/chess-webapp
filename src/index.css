@@ -1,3 +1,9 @@
+html,
+.button--text {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 1.1rem;
+}
+
 .game {
   display: flex;
   justify-content: center;
@@ -61,6 +67,42 @@
   justify-content: center;
 }
 
-.button__box--left {
-  width: 50%;
+.button__modal {
+  width: 40%;
+  margin: 3%;
+  padding: 3%;
+}
+
+.button__header {
+  margin: auto 0 auto 5%;
+  width: 20%;
+  padding: 1.5% 0;
+}
+
+.button__header .button--text {
+  font-size: 1.5rem;
+}
+
+.button__option {
+  background-color: #3f2f4f;
+  color: white;
+}
+
+.sweet--loading {
+  margin: auto 2%;
+  height: auto;
+}
+
+.modal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.paper {
+  background-color: white;
+  border: 3px solid #4f372f;
+  padding: 5%;
+  margin: -30%;
+  text-align: center;
 }

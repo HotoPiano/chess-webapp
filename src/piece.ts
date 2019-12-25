@@ -1,5 +1,4 @@
 import Pos from "./Pos";
-import King from "./king";
 
 export default abstract class Piece {
   constructor(isBlack: boolean) {
