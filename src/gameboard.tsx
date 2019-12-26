@@ -1,13 +1,6 @@
 import * as React from "react";
 import "./App.css";
 import Pos from "./Pos";
-import Piece from "./piece";
-import Bishop from "./bishop";
-import Rook from "./rook";
-import King from "./king";
-import Queen from "./queen";
-import Pawn from "./pawn";
-import Knight from "./knight";
 import open_field from "./img/open_field.png";
 import Board from "./board";
 
@@ -31,9 +24,9 @@ export const GameBoard = (p: {
   const handleCellClick = (posClicked: Pos) => {
     if (p.board.stepsAhead < 0 || !p.board.isBlack) {
       // Piece is already selected, try action
-      if (selectedPos.y != -1) {
+      if (selectedPos.y !== -1) {
         // Deselect already selected piece
-        if (selectedPos.x == posClicked.x && selectedPos.y == posClicked.y) {
+        if (selectedPos.x === posClicked.x && selectedPos.y === posClicked.y) {
           showMoves(null);
         }
         // Piece already selected
@@ -72,15 +65,15 @@ export const GameBoard = (p: {
 
   const move = (from: Pos, to: Pos) => {
     p.board.movePiece(from, to);
-    showMoves(null);
     p.setIsBlack(p.board.isBlack);
+    showMoves(null);
   };
 
   const moveAI = () => {
     let log = new Date();
     p.board.moveAI();
-    showMoves(null);
     p.setIsBlack(p.board.isBlack);
+    showMoves(null);
     console.log(
       "AI round: " +
         Math.round(new Date().getTime() - log.getTime()) +
@@ -115,8 +108,8 @@ export const GameBoard = (p: {
     for (let y = 0; y < 8; y++) {
       for (let x = 0; x < 8; x++) {
         if (
-          (p.board.enemyMoveFrom.x == x && p.board.enemyMoveFrom.y == y) ||
-          (p.board.enemyMoveTo.x == x && p.board.enemyMoveTo.y == y)
+          (p.board.enemyMoveFrom.x === x && p.board.enemyMoveFrom.y === y) ||
+          (p.board.enemyMoveTo.x === x && p.board.enemyMoveTo.y === y)
         ) {
           tmpMoveOpportunities[y][x] = 3;
         }
@@ -130,7 +123,7 @@ export const GameBoard = (p: {
         ) {
           if (
             p.board.pieces[y][x] != null &&
-            p.board.pieces[y][x]?.isBlack !=
+            p.board.pieces[y][x]?.isBlack !==
               p.board.pieces[posClicked.y][posClicked.x]?.isBlack
           ) {
             tmpMoveOpportunities[y][x] = 2;
@@ -151,11 +144,11 @@ export const GameBoard = (p: {
     let row = [];
     for (let x = 0; x < 8; x++) {
       row.push(
-        <div>
+        <div key={num}>
           <Cell
             id={num}
             pos={{ y, x }}
-            isSelected={selectedPos.y == y && selectedPos.x == x}
+            isSelected={selectedPos.y === y && selectedPos.x === x}
             enemyMove={moveOpportunities[y][x] === 3}
             canKill={moveOpportunities[y][x] === 2}
             canMove={moveOpportunities[y][x] === 1}
@@ -166,7 +159,12 @@ export const GameBoard = (p: {
       );
       num++;
     }
-    Cells.push(<div className="row"> {row} </div>);
+    Cells.push(
+      <div className="row" key={num + 100}>
+        {" "}
+        {row}{" "}
+      </div>
+    );
   }
 
   return <div className="board">{Cells}</div>;

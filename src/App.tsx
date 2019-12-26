@@ -2,13 +2,6 @@ import * as React from "react";
 import "./App.css";
 import { GameBoard } from "./gameboard";
 import { ModalPopup, ModalState } from "./modal";
-import Piece from "./piece";
-import Bishop from "./bishop";
-import Rook from "./rook";
-import King from "./king";
-import Queen from "./queen";
-import Pawn from "./pawn";
-import Knight from "./knight";
 import Loader from "./loader";
 import Board from "./board";
 

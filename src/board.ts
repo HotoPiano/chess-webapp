@@ -84,7 +84,7 @@ export default class Board {
         let piece: Piece | null = this.pieces[y][x];
         if (
           piece instanceof Pawn &&
-          piece.isBlack == this.pieces[from.y][from.x]?.isBlack
+          piece.isBlack === this.pieces[from.y][from.x]?.isBlack
         ) {
           piece.justMovedDouble = false;
         }
@@ -95,16 +95,16 @@ export default class Board {
     this.pieces[to.y][to.x]?.setHasMoved();
 
     // Possibly make pawn into queen
-    if (this.pieces[to.y][to.x] instanceof Pawn && (to.y == 0 || to.y == 7)) {
+    if (this.pieces[to.y][to.x] instanceof Pawn && (to.y === 0 || to.y === 7)) {
       this.pieces[to.y][to.x] = new Queen(this.isBlack);
     }
 
     // Possibly castling, king has moved 2 steps? also move rook
     if (this.pieces[to.y][to.x] instanceof King) {
       let leftCastling: boolean | null = null;
-      if (from.x - 2 == to.x) {
+      if (from.x - 2 === to.x) {
         leftCastling = true;
-      } else if (from.x + 2 == to.x) {
+      } else if (from.x + 2 === to.x) {
         leftCastling = false;
       }
       if (leftCastling != null) {
@@ -126,7 +126,7 @@ export default class Board {
       if (
         piece instanceof Pawn &&
         piece.justMovedDouble &&
-        piece.isBlack != this.pieces[to.y][to.x]?.isBlack
+        piece.isBlack !== this.pieces[to.y][to.x]?.isBlack
       ) {
         this.pieces[from.y][to.x] = null;
       }
@@ -148,7 +148,7 @@ export default class Board {
         let piece: Piece | null = this.pieces[y][x];
         if (
           piece != null &&
-          piece.isBlack == this.isBlack &&
+          piece.isBlack === this.isBlack &&
           piece instanceof King
         ) {
           king = piece;
@@ -167,7 +167,7 @@ export default class Board {
           // Check if any of the moved players pieces threatens next players king
           if (piece != null) {
             // Pieces of moved player
-            if (piece.isBlack != king.isBlack) {
+            if (piece.isBlack !== king.isBlack) {
               if (piece.canMove({ y: y, x: x }, kingPos, this.pieces)) {
                 kingThreatened = true;
               }
@@ -212,10 +212,10 @@ export default class Board {
     }[] = [];
     possibleMoves.forEach(element => {
       let addMove: boolean = false;
-      if (chosenMoves.length == 0) {
+      if (chosenMoves.length === 0) {
         addMove = true;
       } else if (
-        element.pieceValues.bv - element.pieceValues.wv ==
+        element.pieceValues.bv - element.pieceValues.wv ===
         chosenMoves[0].pieceValues.bv - chosenMoves[0].pieceValues.wv
       ) {
         addMove = true;
@@ -313,7 +313,7 @@ export default class Board {
         if (
           piece != null &&
           movedPiece != null &&
-          piece.isBlack == movedPiece.isBlack &&
+          piece.isBlack === movedPiece.isBlack &&
           piece instanceof King
         ) {
           const king: King = piece;
@@ -324,7 +324,7 @@ export default class Board {
               let tmpPiece: Piece | null = tmpBoard.pieces[y2][x2];
               if (
                 tmpPiece != null &&
-                tmpPiece.isBlack != king.isBlack &&
+                tmpPiece.isBlack !== king.isBlack &&
                 tmpPiece.canMove(
                   { y: y2, x: x2 },
                   { y: y, x: x },
@@ -397,7 +397,7 @@ export default class Board {
         let from: Pos = { y: y, x: x };
         let tmpPiece = board.pieces[from.y][from.x];
         // Find all black pieces' possible moves
-        if (tmpPiece != null && tmpPiece.isBlack == board.isBlack) {
+        if (tmpPiece != null && tmpPiece.isBlack === board.isBlack) {
           for (let y2 = 0; y2 < 8; y2++) {
             for (let x2 = 0; x2 < 8; x2++) {
               let to: Pos = { y: y2, x: x2 };

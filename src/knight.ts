@@ -5,9 +5,6 @@ import Pos from "./Pos";
 
 export default class Knight extends Piece {
   value = 3;
-  constructor(isBlack: boolean) {
-    super(isBlack);
-  }
 
   getImage = () => {
     return this.isBlack ? black_knight : white_knight;
@@ -17,8 +14,8 @@ export default class Knight extends Piece {
 
   canMove = (from: Pos, to: Pos, pieces: (Piece | null)[][]) => {
     // Not occupied by ally
-    if (pieces[to.y][to.x] != null) {
-      if (pieces[to.y][to.x]?.isBlack == this.isBlack) {
+    if (pieces[to.y][to.x] !== null) {
+      if (pieces[to.y][to.x]?.isBlack === this.isBlack) {
         return false;
       }
     }

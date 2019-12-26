@@ -26,7 +26,7 @@ export default abstract class Piece {
 
     let path: Pos = { y: from.y, x: from.x };
 
-    while (path.x + addX != to.x || path.y + addY != to.y) {
+    while (path.x + addX !== to.x || path.y + addY !== to.y) {
       path.x += addX;
       path.y += addY;
       // Check if path is blocked
@@ -37,7 +37,8 @@ export default abstract class Piece {
 
     // Check that destination is open space or enemy
     return (
-      pieces[to.y][to.x] == null || pieces[to.y][to.x]?.isBlack != this.isBlack
+      pieces[to.y][to.x] === null ||
+      pieces[to.y][to.x]?.isBlack !== this.isBlack
     );
   };
 }

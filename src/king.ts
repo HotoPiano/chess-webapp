@@ -7,9 +7,6 @@ import Rook from "./rook";
 export default class King extends Piece {
   value = 9;
   hasMoved: boolean = false;
-  constructor(isBlack: boolean) {
-    super(isBlack);
-  }
 
   getImage = () => {
     return this.isBlack ? black_king : white_king;
@@ -31,11 +28,11 @@ export default class King extends Piece {
     }
 
     // Castling
-    if (!this.hasMoved && from.y == to.y) {
-      let rookFromPosX = from.x - 2 == to.x ? 0 : from.x + 2 == to.x ? 7 : -1;
-      let rookToPosX = rookFromPosX == 0 ? 3 : rookFromPosX == 7 ? 5 : -1;
+    if (!this.hasMoved && from.y === to.y) {
+      let rookFromPosX = from.x - 2 === to.x ? 0 : from.x + 2 === to.x ? 7 : -1;
+      let rookToPosX = rookFromPosX === 0 ? 3 : rookFromPosX === 7 ? 5 : -1;
       let piece = pieces[from.y][rookFromPosX];
-      if (rookFromPosX != -1 && piece instanceof Rook) {
+      if (rookFromPosX !== -1 && piece instanceof Rook) {
         let rook: Rook | null = piece;
         if (
           !rook.hasMoved &&
@@ -50,11 +47,11 @@ export default class King extends Piece {
             for (let x = 0; x < 8; x++) {
               let kingMidStep: Pos = {
                 y: to.y,
-                x: from.x + (from.x - 2 == to.x ? -1 : +1)
+                x: from.x + (from.x - 2 === to.x ? -1 : +1)
               };
               if (
-                pieces[y][x] != null &&
-                pieces[y][x]?.isBlack != this.isBlack &&
+                pieces[y][x] !== null &&
+                pieces[y][x]?.isBlack !== this.isBlack &&
                 pieces[y][x]?.canMove({ y: y, x: x }, kingMidStep, pieces)
               ) {
                 return false;

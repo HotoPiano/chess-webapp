@@ -5,9 +5,6 @@ import Pos from "./Pos";
 
 export default class Queen extends Piece {
   value = 7;
-  constructor(isBlack: boolean) {
-    super(isBlack);
-  }
 
   getImage = () => {
     return this.isBlack ? black_queen : white_queen;
@@ -17,10 +14,10 @@ export default class Queen extends Piece {
 
   canMove = (from: Pos, to: Pos, pieces: (Piece | null)[][]) => {
     if (
-      (from.x == to.x ||
-        from.y == to.y ||
-        from.y - to.y == from.x - to.x ||
-        from.y - to.y == to.x - from.x) &&
+      (from.x === to.x ||
+        from.y === to.y ||
+        from.y - to.y === from.x - to.x ||
+        from.y - to.y === to.x - from.x) &&
       this.pathToDestIsOpen(from, to, pieces)
     ) {
       return true;

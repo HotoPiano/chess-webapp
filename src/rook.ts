@@ -6,9 +6,6 @@ import Pos from "./Pos";
 export default class Rook extends Piece {
   value = 5;
   hasMoved: boolean = false;
-  constructor(isBlack: boolean) {
-    super(isBlack);
-  }
 
   getImage = () => {
     return this.isBlack ? black_rook : white_rook;
@@ -20,7 +17,7 @@ export default class Rook extends Piece {
 
   canMove = (from: Pos, to: Pos, pieces: (Piece | null)[][]) => {
     if (
-      (from.x == to.x || from.y == to.y) &&
+      (from.x === to.x || from.y === to.y) &&
       this.pathToDestIsOpen(from, to, pieces)
     ) {
       return true;

@@ -7,9 +7,6 @@ export default class Pawn extends Piece {
   value = 1;
   hasMoved: boolean = false;
   justMovedDouble: boolean = false;
-  constructor(isBlack: boolean) {
-    super(isBlack);
-  }
 
   getImage = () => {
     return this.isBlack ? black_pawn : white_pawn;
@@ -26,8 +23,8 @@ export default class Pawn extends Piece {
       if (
         this.isBlack &&
         from.x === to.x &&
-        (from.y + 1 == to.y ||
-          (from.y + 2 == to.y &&
+        (from.y + 1 === to.y ||
+          (from.y + 2 === to.y &&
             !this.hasMoved &&
             pieces[from.y + 1][from.x] == null))
       ) {
@@ -35,10 +32,10 @@ export default class Pawn extends Piece {
       } else if (
         !this.isBlack &&
         from.x === to.x &&
-        (from.y - 1 == to.y ||
-          (from.y - 2 == to.y &&
+        (from.y - 1 === to.y ||
+          (from.y - 2 === to.y &&
             !this.hasMoved &&
-            pieces[from.y - 1][from.x] == null))
+            pieces[from.y - 1][from.x] === null))
       ) {
         return true;
       }
@@ -48,17 +45,17 @@ export default class Pawn extends Piece {
         let enemy: Piece | null = pieces[enemyPosY][to.x];
         if (enemy instanceof Pawn && enemy.justMovedDouble) {
           if (
-            pieces[to.y][to.x] == null &&
+            pieces[to.y][to.x] === null &&
             this.isBlack &&
-            (from.x == to.x - 1 || from.x == to.x + 1) &&
-            from.y == to.y - 1
+            (from.x === to.x - 1 || from.x === to.x + 1) &&
+            from.y === to.y - 1
           ) {
             return true;
           } else if (
-            pieces[to.y][to.x] == null &&
+            pieces[to.y][to.x] === null &&
             !this.isBlack &&
-            (from.x == to.x - 1 || from.x == to.x + 1) &&
-            from.y == to.y + 1
+            (from.x === to.x - 1 || from.x === to.x + 1) &&
+            from.y === to.y + 1
           ) {
             return true;
           }
@@ -71,15 +68,15 @@ export default class Pawn extends Piece {
       if (
         !pieces[to.y][to.x].isBlack &&
         this.isBlack &&
-        (from.x == to.x - 1 || from.x == to.x + 1) &&
-        from.y == to.y - 1
+        (from.x === to.x - 1 || from.x === to.x + 1) &&
+        from.y === to.y - 1
       ) {
         return true;
       } else if (
         pieces[to.y][to.x].isBlack &&
         !this.isBlack &&
-        (from.x == to.x - 1 || from.x == to.x + 1) &&
-        from.y == to.y + 1
+        (from.x === to.x - 1 || from.x === to.x + 1) &&
+        from.y === to.y + 1
       ) {
         return true;
       }

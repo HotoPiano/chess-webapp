@@ -5,9 +5,6 @@ import Pos from "./Pos";
 
 export default class Bishop extends Piece {
   value = 3;
-  constructor(isBlack: boolean) {
-    super(isBlack);
-  }
 
   getImage = () => {
     return this.isBlack ? black_bishop : white_bishop;
@@ -17,7 +14,7 @@ export default class Bishop extends Piece {
 
   canMove = (from: Pos, to: Pos, pieces: (Piece | null)[][]) => {
     if (
-      (from.y - to.y == from.x - to.x || from.y - to.y == to.x - from.x) &&
+      (from.y - to.y === from.x - to.x || from.y - to.y === to.x - from.x) &&
       this.pathToDestIsOpen(from, to, pieces)
     ) {
       return true;

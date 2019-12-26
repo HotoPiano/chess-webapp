@@ -50,7 +50,7 @@ export const ModalPopup = (p: {
     button: ModalButton | null;
     autoFocus: boolean;
   }) => {
-    if (p.button == null || p.button.text == "") {
+    if (p.button === null || p.button.text === "") {
       return null;
     } else {
       return (
