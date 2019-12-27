@@ -120,9 +120,13 @@ button {
   user-select: none;
 }
 
-@media only screen and (max-width: 1500) {
-  html {
+@media only screen and (max-width: 1500px) {
+  html,
+  .button--text {
     font-size: 0.9rem;
+  }
+  .button__header .button--text {
+    font-size: 1.4rem;
   }
 }
 
