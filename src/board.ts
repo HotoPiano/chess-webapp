@@ -12,7 +12,6 @@ export default class Board {
   isBlack: boolean;
   enemyMoveFrom: Pos;
   enemyMoveTo: Pos;
-  //selectedPos: Pos;
   stepsAhead: number;
   constructor(stepsAhead?: number) {
     if (stepsAhead) {
@@ -25,7 +24,6 @@ export default class Board {
     this.isBlack = false;
     this.enemyMoveFrom = { y: -1, x: -1 };
     this.enemyMoveTo = { y: -1, x: -1 };
-    //this.selectedPos = { y: -1, x: -1 };
   }
 
   getPiecesInitialState = (): (Piece | null)[][] => {
@@ -132,7 +130,6 @@ export default class Board {
       }
     }
     // Update game info
-    //this.selectedPos = { y: -1, x: -1 };
     this.isBlack = !this.isBlack;
   };
 
@@ -140,6 +137,40 @@ export default class Board {
     kingisBlack: boolean;
     kingThreatened: boolean;
   } | null => {
+    const insufficentMaterials = () => {
+      /*
+      // Combinations with insufficient material to checkmate (draw) are:
+      let remi1 = false; // king versus king
+      let remi2 = false; // king and bishop versus king
+      let remi3 = false; // king and knight versus king
+      let remi4 = false; // king and bishop versus king and bishop with the bishops on the same color.
+      let bishop1: Bishop | null = null;
+      let bishop2: Bishop | null = null;
+      for (let y = 0; y < 8; y++) {
+        for (let x = 0; x < 8; x++) {
+          let piece: Piece | null = this.pieces[y][x];
+          if (piece != null) {
+            if (piece instanceof King) {
+            }
+            if (piece instanceof Bishop) {
+              remi1 = false;
+            } else if (piece instanceof Knight) {
+              remi1 = false;
+            } else {
+              return false;
+            }
+          }
+        }
+      }
+      if (remi1 || remi2 || remi3 || remi4) {
+        return true;
+      }
+      */
+      return false;
+    };
+    if (insufficentMaterials()) {
+      return { kingisBlack: false, kingThreatened: false };
+    }
     // Find next players king
     let kingPos: Pos | null = null;
     let king: King | null = null;
@@ -158,6 +189,7 @@ export default class Board {
     }
     let kingThreatened = false;
     let canMoveSafely = false;
+
     // check if gameend, first check all pieces
     if (kingPos != null && king != null) {
       for (let y = 0; y < 8; y++) {
@@ -253,48 +285,6 @@ export default class Board {
       }
     }
     return { wv: whiteValues, bv: blackValues };
-  };
-
-  clonePieces = () => {
-    let tmpPieces: (Piece | null)[][] = [];
-    this.pieces.forEach(element => {
-      tmpPieces.push([...element]);
-    });
-    for (let y = 0; y < 8; y++) {
-      for (let x = 0; x < 8; x++) {
-        const piece = this.pieces[y][x];
-        let newPiece: Piece | null = null;
-        if (piece instanceof King) {
-          newPiece = new King(piece.isBlack);
-          if (newPiece instanceof King) {
-            newPiece.hasMoved = piece.hasMoved;
-          }
-        }
-        if (piece instanceof Queen) {
-          newPiece = new Queen(piece.isBlack);
-        }
-        if (piece instanceof Rook) {
-          newPiece = new Rook(piece.isBlack);
-          if (newPiece instanceof Rook) {
-            newPiece.hasMoved = piece.hasMoved;
-          }
-        }
-        if (piece instanceof Pawn) {
-          newPiece = new Pawn(piece.isBlack);
-          if (newPiece instanceof Pawn) {
-            newPiece.hasMoved = piece.hasMoved;
-          }
-        }
-        if (piece instanceof Bishop) {
-          newPiece = new Bishop(piece.isBlack);
-        }
-        if (piece instanceof Knight) {
-          newPiece = new Knight(piece.isBlack);
-        }
-        tmpPieces[y][x] = newPiece;
-      }
-    }
-    return tmpPieces;
   };
 
   ownKingThreatenedByMove = (from: Pos, to: Pos) => {
@@ -427,5 +417,53 @@ export default class Board {
       }
     }
     return pieceValues;
+  };
+
+  copyPieces = () => {
+    return this.pieces.map(arr => {
+      return arr.slice();
+    });
+  };
+
+  clonePieces = () => {
+    let tmpPieces: (Piece | null)[][] = [];
+    this.pieces.forEach(element => {
+      tmpPieces.push([...element]);
+    });
+    for (let y = 0; y < 8; y++) {
+      for (let x = 0; x < 8; x++) {
+        const piece = this.pieces[y][x];
+        let newPiece: Piece | null = null;
+        if (piece instanceof King) {
+          newPiece = new King(piece.isBlack);
+          if (newPiece instanceof King) {
+            newPiece.hasMoved = piece.hasMoved;
+          }
+        }
+        if (piece instanceof Queen) {
+          newPiece = new Queen(piece.isBlack);
+        }
+        if (piece instanceof Rook) {
+          newPiece = new Rook(piece.isBlack);
+          if (newPiece instanceof Rook) {
+            newPiece.hasMoved = piece.hasMoved;
+          }
+        }
+        if (piece instanceof Pawn) {
+          newPiece = new Pawn(piece.isBlack);
+          if (newPiece instanceof Pawn) {
+            newPiece.hasMoved = piece.hasMoved;
+          }
+        }
+        if (piece instanceof Bishop) {
+          newPiece = new Bishop(piece.isBlack);
+        }
+        if (piece instanceof Knight) {
+          newPiece = new Knight(piece.isBlack);
+        }
+        tmpPieces[y][x] = newPiece;
+      }
+    }
+    return tmpPieces;
   };
 }

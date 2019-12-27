@@ -26,6 +26,21 @@ html,
   display: flex;
 }
 
+.cell {
+  border: none;
+  outline: none;
+  border: 1px rgb(8, 8, 8);
+  border-style: solid;
+}
+
+.cell:hover {
+  cursor: grab !important;
+}
+
+.cell:active {
+  cursor: grabbing !important;
+}
+
 .cell--enemy-move {
   background-color: palegreen;
 }
@@ -35,7 +50,7 @@ html,
 }
 
 .cell--can-move {
-  background-color: rgb(99, 196, 171);
+  background-color: rgb(159, 230, 212);
 }
 
 .cell--dark {
@@ -48,13 +63,6 @@ html,
 
 .piece--selected {
   opacity: 0.6;
-}
-
-.cell {
-  border: none;
-  outline: none;
-  border: 1px rgb(8, 8, 8);
-  border-style: solid;
 }
 
 .piece {
@@ -106,3 +114,15 @@ html,
   margin: -30%;
   text-align: center;
 }
+
+button {
+  -webkit-user-drag: element;
+  user-select: none;
+}
+/*
+html:hover {
+  border: 15px solid black !important;
+  outline-style: solid !important;
+  outline-color: red !important;
+}
+*/
