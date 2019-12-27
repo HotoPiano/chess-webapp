@@ -71,6 +71,12 @@ const App: React.FC = () => {
         return (
           <div className="board--column__header">
             <h1>Current player: {board.isBlack ? "black" : "white"}</h1>
+            <button
+              className="button__option button__header"
+              onClick={askForOpponent}
+            >
+              <span className="button--text">New game</span>
+            </button>
           </div>
         );
       }
