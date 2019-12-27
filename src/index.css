@@ -124,7 +124,7 @@ button {
   h1 {
     font-size: 1.5rem;
   }
-  .button__header {
+  .button--not--mobile {
     display: none;
   }
 }
