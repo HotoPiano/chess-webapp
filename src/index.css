@@ -1,7 +1,7 @@
 html,
 .button--text {
   font-family: Helvetica, Arial, sans-serif;
-  font-size: 1.1em;
+  font-size: 1.1rem;
 }
 
 .game {
@@ -88,7 +88,7 @@ html,
 }
 
 .button__header .button--text {
-  font-size: 1.5em;
+  font-size: 1.5rem;
 }
 
 .button__option {
@@ -119,6 +119,13 @@ button {
   -webkit-user-drag: element;
   user-select: none;
 }
+
+@media only screen and (max-width: 1500) {
+  html {
+    font-size: 0.9rem;
+  }
+}
+
 /*
 html:hover {
   border: 15px solid black !important;
