@@ -83,7 +83,7 @@ html,
 
 .button__header {
   margin: auto 0 auto 5%;
-  width: 20%;
+  width: 18%;
   padding: 1.5% 0;
 }
 
@@ -120,20 +120,21 @@ button {
   user-select: none;
 }
 
-@media only screen and (max-width: 1500px) {
-  html,
-  .button--text {
-    font-size: 0.9rem;
+@media only screen and (max-width: 900px) {
+  h1 {
+    font-size: 1.5rem;
   }
-  .button__header .button--text {
-    font-size: 1.4rem;
+  .button__header {
+    display: none;
   }
 }
 
-/*
-html:hover {
-  border: 15px solid black !important;
-  outline-style: solid !important;
-  outline-color: red !important;
+@media only screen and (max-width: 500px) {
+  html,
+  .modal {
+    font-size: 0.9rem;
+  }
+  .button--text {
+    font-size: 0.9rem;
+  }
 }
-*/
