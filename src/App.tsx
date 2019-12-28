@@ -50,10 +50,9 @@ const App: React.FC = () => {
   const onGameOver = (blackCanMove: boolean, kingThreatened: boolean) => {
     let playerText: string = blackCanMove ? "White " : "Black ";
     setGameOverText(
-      "Game over! " +
-        (kingThreatened
-          ? playerText + "player wins!"
-          : playerText + "player cannot move, it's a draw!")
+      kingThreatened
+        ? "Game over! " + playerText + "player wins!"
+        : !playerText + "player cannot move, it's a draw!"
     );
     setOnGoingGame(false);
   };
