@@ -75,7 +75,7 @@ export default class Board {
     ];
   };
 
-  movePiece = (from: Pos, to: Pos) => {
+  movePiece = (from: Pos, to: Pos, updatePieceInfo: boolean) => {
     // Set all pawns of same color justMovedDouble to false (for passant usage)
     for (let y = 0; y < 8; y++) {
       for (let x = 0; x < 8; x++) {
@@ -90,7 +90,9 @@ export default class Board {
     }
     this.pieces[to.y][to.x] = this.pieces[from.y][from.x];
     this.pieces[from.y][from.x] = null;
-    this.pieces[to.y][to.x]?.setHasMoved();
+    if (updatePieceInfo) {
+      this.pieces[to.y][to.x]?.setHasMoved();
+    }
 
     // Possibly make pawn into queen
     if (this.pieces[to.y][to.x] instanceof Pawn && (to.y === 0 || to.y === 7)) {
@@ -266,7 +268,7 @@ export default class Board {
     const chosenMove = chosenMoves[chosenIndex];
     this.enemyMoveFrom = chosenMove.from;
     this.enemyMoveTo = chosenMove.to;
-    this.movePiece(chosenMove.from, chosenMove.to);
+    this.movePiece(chosenMove.from, chosenMove.to, true);
   };
 
   ownKingThreatenedByMove = (from: Pos, to: Pos) => {
@@ -275,7 +277,7 @@ export default class Board {
     tmpBoard.isBlack = this.isBlack;
     tmpBoard.pieces = this.clonePieces();
 
-    tmpBoard.movePiece(from, to);
+    tmpBoard.movePiece(from, to, true);
 
     // Find players king
     let movedPiece: Piece | null = tmpBoard.pieces[to.y][to.x];
@@ -337,7 +339,7 @@ export default class Board {
                 let tmpBoard: Board = new Board();
                 tmpBoard.isBlack = this.isBlack;
                 tmpBoard.pieces = this.clonePieces();
-                tmpBoard.movePiece(from, to);
+                tmpBoard.movePiece(from, to, true);
 
                 // compare new board value
                 let pieceValues = tmpBoard.getBoardValue();
@@ -381,7 +383,7 @@ export default class Board {
                 let tmpBoard: Board = new Board();
                 tmpBoard.isBlack = board.isBlack;
                 tmpBoard.pieces = this.clonePieces();
-                tmpBoard.movePiece(from, to);
+                tmpBoard.movePiece(from, to, true);
 
                 if (stepsAhead > 0) {
                   let underPieceValues = tmpBoard.findBestMoves(

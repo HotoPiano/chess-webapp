@@ -13,16 +13,21 @@ export const GameBoard = (p: {
   setIsBlack(isBlack: boolean): void;
 }) => {
   const [selectedPos, setSelectedPos] = React.useState<Pos>({ y: -1, x: -1 });
-  const [moveOpportunities, setMoveOpportunities] = React.useState<number[][]>([
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0]
-  ]);
+  const getMoveOpportunitiesInitialState = (): number[][] => {
+    return [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ];
+  };
+  const [moveOpportunities, setMoveOpportunities] = React.useState<number[][]>(
+    getMoveOpportunitiesInitialState
+  );
 
   const handleCellSelect = (posClicked: Pos) => {
     if (p.board.stepsAhead < 0 || !p.board.isBlack) {
@@ -69,25 +74,8 @@ export const GameBoard = (p: {
     }
   };
 
-  /*
-  const handleCellDrop = (to: Pos) => {
-    if (p.board.stepsAhead < 0 || !p.board.isBlack) {
-      if (
-        p.board.pieces[selectedPos.y][selectedPos.x]?.canMove(
-          selectedPos,
-          to,
-          p.board.pieces
-        ) &&
-        !p.board.ownKingThreatenedByMove(selectedPos, to)
-      ) {
-        move(selectedPos, to);
-      }
-    }
-  };
-  */
-
   const move = (from: Pos, to: Pos) => {
-    p.board.movePiece(from, to);
+    p.board.movePiece(from, to, true);
     p.setIsBlack(p.board.isBlack);
     p.board.enemyMoveFrom = { y: -1, x: -1 };
     p.board.enemyMoveTo = { y: -1, x: -1 };
@@ -118,16 +106,7 @@ export const GameBoard = (p: {
   }, [move, moveAI]);
 
   const showMoves = (posClicked: Pos | null) => {
-    let tmpMoveOpportunities: number[][] = [
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0]
-    ];
+    let tmpMoveOpportunities: number[][] = getMoveOpportunitiesInitialState();
     for (let y = 0; y < 8; y++) {
       for (let x = 0; x < 8; x++) {
         if (
