@@ -236,7 +236,7 @@ export default class Board {
   };
 
   moveAI = () => {
-    let possibleMoves = this.findBestMoves(this.stepsAhead);
+    let possibleMoves = this.findBestMove(this.stepsAhead);
     let chosenMoves: {
       from: Pos;
       to: Pos;
@@ -267,24 +267,6 @@ export default class Board {
     this.enemyMoveFrom = chosenMove.from;
     this.enemyMoveTo = chosenMove.to;
     this.movePiece(chosenMove.from, chosenMove.to);
-  };
-
-  getBoardValue = () => {
-    let whiteValues: number = 0;
-    let blackValues: number = 0;
-    for (let x = 0; x < 8; x++) {
-      for (let y = 0; y < 8; y++) {
-        let piece = this.pieces[y][x];
-        if (piece != null) {
-          if (piece.isBlack) {
-            blackValues += piece.value;
-          } else {
-            whiteValues += piece.value;
-          }
-        }
-      }
-    }
-    return { wv: whiteValues, bv: blackValues };
   };
 
   ownKingThreatenedByMove = (from: Pos, to: Pos) => {
@@ -331,7 +313,7 @@ export default class Board {
     return false;
   };
 
-  findBestMoves = (stepsAhead: number) => {
+  findBestMove = (stepsAhead: number) => {
     let possibleMoves: {
       from: Pos;
       to: Pos;
@@ -359,8 +341,8 @@ export default class Board {
 
                 // compare new board value
                 let pieceValues = tmpBoard.getBoardValue();
-                // try all white responsemoves to that
-                let underPieceValues = tmpBoard.findBestMove(
+                // recursively try all white responsemoves - then black responsemoves - then white...
+                let underPieceValues = tmpBoard.findBestMoves(
                   stepsAhead,
                   tmpBoard
                 );
@@ -376,7 +358,7 @@ export default class Board {
     return possibleMoves;
   };
 
-  findBestMove = (
+  findBestMoves = (
     stepsAhead: number,
     board: Board
   ): { bv: number; wv: number } => {
@@ -402,7 +384,7 @@ export default class Board {
                 tmpBoard.movePiece(from, to);
 
                 if (stepsAhead > 0) {
-                  let underPieceValues = tmpBoard.findBestMove(
+                  let underPieceValues = tmpBoard.findBestMoves(
                     stepsAhead - 1,
                     tmpBoard
                   );
@@ -417,6 +399,24 @@ export default class Board {
       }
     }
     return pieceValues;
+  };
+
+  getBoardValue = () => {
+    let whiteValues: number = 0;
+    let blackValues: number = 0;
+    for (let x = 0; x < 8; x++) {
+      for (let y = 0; y < 8; y++) {
+        let piece = this.pieces[y][x];
+        if (piece != null) {
+          if (piece.isBlack) {
+            blackValues += piece.value;
+          } else {
+            whiteValues += piece.value;
+          }
+        }
+      }
+    }
+    return { wv: whiteValues, bv: blackValues };
   };
 
   copyPieces = () => {
